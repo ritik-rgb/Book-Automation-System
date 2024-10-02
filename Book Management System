@@ -1,0 +1,255 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
+// Custom Exception: EmptyFieldException
+class EmptyFieldException extends Exception {
+    public EmptyFieldException(String message) {
+        super(message);
+    }
+}
+
+// Custom Exception: BookNotFoundException
+class BookNotFoundException extends Exception {
+    public BookNotFoundException(String message) {
+        super(message);
+    }
+}
+
+// Book Class
+class Book {
+    private String title;
+    private String author;
+    private String isbn;
+
+    // Constructor
+    public Book(String title, String author, String isbn) throws EmptyFieldException {
+        if (title.isEmpty() || author.isEmpty() || isbn.isEmpty()) {
+            throw new EmptyFieldException("Title, Author, and ISBN cannot be empty.");
+        }
+        this.title = title;
+        this.author = author;
+        this.isbn = isbn;
+    }
+
+    // Getters and Setters
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) throws EmptyFieldException {
+        if (title.isEmpty()) {
+            throw new EmptyFieldException("Title cannot be empty.");
+        }
+        this.title = title;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) throws EmptyFieldException {
+        if (author.isEmpty()) {
+            throw new EmptyFieldException("Author cannot be empty.");
+        }
+        this.author = author;
+    }
+
+    public String getIsbn() {
+        return isbn;
+    }
+
+    public void setIsbn(String isbn) throws EmptyFieldException {
+        if (isbn.isEmpty()) {
+            throw new EmptyFieldException("ISBN cannot be empty.");
+        }
+        this.isbn = isbn;
+    }
+
+    // toString method
+    @Override
+    public String toString() {
+        return "Book [Title=" + title + ", Author=" + author + ", ISBN=" + isbn + "]";
+    }
+}
+
+// BookManager Class
+class BookManager {
+    private ArrayList<Book> books;
+
+    // Constructor
+    public BookManager() {
+        this.books = new ArrayList<>();
+    }
+
+    // Method to add a book
+    public void addBook(Book book) {
+        books.add(book);
+        System.out.println("Book added successfully.");
+    }
+
+    // Method to remove a book by ISBN
+    public void removeBook(String isbn) throws BookNotFoundException {
+        Book book = searchBookByISBN(isbn);
+        if (book != null) {
+            books.remove(book);
+            System.out.println("Book removed successfully.");
+        } else {
+            throw new BookNotFoundException("Book with ISBN " + isbn + " not found.");
+        }
+    }
+
+    // Method to view all books
+    public void viewBooks() {
+        if (books.isEmpty()) {
+            System.out.println("No books available.");
+        } else {
+            for (Book book : books) {
+                System.out.println(book);
+            }
+        }
+    }
+
+    // Method to search a book by title
+    public Book searchBookByTitle(String title) {
+        for (Book book : books) {
+            if (book.getTitle().equalsIgnoreCase(title)) {
+                return book;
+            }
+        }
+        return null;
+    }
+
+    // Method to search a book by ISBN
+    private Book searchBookByISBN(String isbn) {
+        for (Book book : books) {
+            if (book.getIsbn().equals(isbn)) {
+                return book;
+            }
+        }
+        return null;
+    }
+
+    // Method to update a book's details
+    public void updateBook(String isbn, String newTitle, String newAuthor) throws BookNotFoundException, EmptyFieldException {
+        Book book = searchBookByISBN(isbn);
+        if (book != null) {
+            book.setTitle(newTitle);
+            book.setAuthor(newAuthor);
+            System.out.println("Book updated successfully.");
+        } else {
+            throw new BookNotFoundException("Book with ISBN " + isbn + " not found.");
+        }
+    }
+}
+
+// Main Class
+public class Main {
+    private static Scanner scanner = new Scanner(System.in);
+    private static BookManager bookManager = new BookManager();
+
+    public static void main(String[] args) {
+        int choice;
+
+        do {
+            displayMenu();
+            choice = scanner.nextInt();
+            scanner.nextLine();  // Consume newline
+
+            switch (choice) {
+                case 1:
+                    addBook();
+                    break;
+                case 2:
+                    removeBook();
+                    break;
+                case 3:
+                    viewBooks();
+                    break;
+                case 4:
+                    searchBook();
+                    break;
+                case 5:
+                    updateBook();
+                    break;
+                case 6:
+                    System.out.println("Exiting the system. Goodbye!");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        } while (choice != 6);
+    }
+
+    // Method to display the menu
+    private static void displayMenu() {
+        System.out.println("\nBook Automation System Menu:");
+        System.out.println("1. Add Book");
+        System.out.println("2. Remove Book");
+        System.out.println("3. View Books");
+        System.out.println("4. Search Book by Title");
+        System.out.println("5. Update Book");
+        System.out.println("6. Exit");
+        System.out.print("Enter your choice: ");
+    }
+
+    // Method to handle adding a book
+    private static void addBook() {
+        try {
+            System.out.print("Enter title: ");
+            String title = scanner.nextLine();
+            System.out.print("Enter author: ");
+            String author = scanner.nextLine();
+            System.out.print("Enter ISBN: ");
+            String isbn = scanner.nextLine();
+
+            Book book = new Book(title, author, isbn);
+            bookManager.addBook(book);
+        } catch (EmptyFieldException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    // Method to handle removing a book
+    private static void removeBook() {
+        try {
+            System.out.print("Enter ISBN of the book to remove: ");
+            String isbn = scanner.nextLine();
+            bookManager.removeBook(isbn);
+        } catch (BookNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    // Method to view all books
+    private static void viewBooks() {
+        bookManager.viewBooks();
+    }
+
+    // Method to handle searching a book by title
+    private static void searchBook() {
+        System.out.print("Enter title of the book to search: ");
+        String title = scanner.nextLine();
+        Book book = bookManager.searchBookByTitle(title);
+        if (book != null) {
+            System.out.println(book);
+        } else {
+            System.out.println("Book with title '" + title + "' not found.");
+        }
+    }
+
+    // Method to handle updating a book
+    private static void updateBook() {
+        try {
+            System.out.print("Enter ISBN of the book to update: ");
+            String isbn = scanner.nextLine();
+            System.out.print("Enter new title: ");
+            String newTitle = scanner.nextLine();
+            System.out.print("Enter new author: ");
+            String newAuthor = scanner.nextLine();
+
+            bookManager.updateBook(isbn, newTitle, newAuthor);
+        } catch (BookNotFoundException | EmptyFieldException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+}
